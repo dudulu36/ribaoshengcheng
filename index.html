@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日报自动生成系统</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .upload-box {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-box:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .upload-box.has-file {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+        
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        
+        .upload-title {
+            font-size: 1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .upload-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8em;
+            display: none;
+        }
+        
+        .upload-box.has-file .file-name {
+            display: inline-block;
+            background: #28a745;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-clear {
+            background: #999;
+            margin-top: 10px;
+        }
+        
+        .result-section {
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .result-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .result-content {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #e9ecef;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>日报自动生成系统</h1>
+            <p>上传省内现货复盘和中长期复盘文件，一键生成日报</p>
+        </div>
+        
+        <div class="card">
+            <div class="upload-section">
+                <div class="upload-box" id="spotBox" onclick="document.getElementById('spotFile').click()">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-title">省内现货复盘文件</div>
+                    <div class="upload-desc">点击选择 Excel 文件</div>
+                    <div class="file-name" id="spotFileName"></div>
+                    <input type="file" id="spotFile" accept=".xlsx,.xls" onchange="handleFileSelect(this, 'spot')">
+                </div>
+                
+                <div class="upload-box" id="midtermBox" onclick="document.getElementById('midtermFile').click()">
+                    <div class="upload-icon">📈</div>
+                    <div class="upload-title">中长期复盘文件</div>
+                    <div class="upload-desc">点击选择 Excel 文件</div>
+                    <div class="file-name" id="midtermFileName"></div>
+                    <input type="file" id="midtermFile" accept=".xlsx,.xls" onchange="handleFileSelect(this, 'midterm')">
+                </div>
+            </div>
+            
+            <button class="btn" id="generateBtn" onclick="generateReport()" disabled>
+                生成日报
+            </button>
+            
+            <button class="btn btn-clear" onclick="clearAll()">
+                清空
+            </button>
+        </div>
+        
+        <div class="card result-section" id="resultSection">
+            <div class="result-title">📝 生成的日报</div>
+            <div class="result-content" id="reportContent"></div>
+            <button class="copy-btn" onclick="copyReport()">复制日报</button>
+        </div>
+    </div>
+    
+    <script>
+        let spotData = null;
+        let midtermData = null;
+        
+        function handleFileSelect(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                
+                if (type === 'spot') {
+                    spotData = jsonData;
+                    document.getElementById('spotFileName').textContent = file.name;
+                    document.getElementById('spotBox').classList.add('has-file');
+                } else {
+                    midtermData = jsonData;
+                    document.getElementById('midtermFileName').textContent = file.name;
+                    document.getElementById('midtermBox').classList.add('has-file');
+                }
+                
+                checkFiles();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function checkFiles() {
+            const btn = document.getElementById('generateBtn');
+            if (spotData && midtermData) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+        
+        function identifyUnits(df) {
+            const units = [];
+            for (let idx = 0; idx < df.length; idx++) {
+                const firstCol = String(df[idx][0] || '');
+                
+                if (['', '合计', '聚合维度'].includes(firstCol)) continue;
+                
+                if (/^\d{4}-\d{2}$/.test(firstCol)) continue;
+                if (/^\d{4}-\d{2}-\d{2}$/.test(firstCol)) continue;
+                
+                if (!isNaN(parseFloat(firstCol)) && firstCol.trim() !== '') continue;
+                
+                if (idx >= 3) units.push(firstCol);
+            }
+            return units;
+        }
+        
+        function parseSpotFile(df, units) {
+            const result = {};
+            let currentUnit = null;
+            
+            for (let idx = 0; idx < df.length; idx++) {
+                const firstCol = String(df[idx][0] || '');
+                
+                for (const unit of units) {
+                    if (firstCol === unit) {
+                        currentUnit = unit;
+                        if (!result[unit]) result[unit] = {};
+                        result[unit]['月累计电量'] = parseFloat(df[idx][1]) || 0;
+                        result[unit]['月累计电价'] = parseFloat(df[idx][3]) || 0;
+                        break;
+                    }
+                }
+                
+                const dateMatch = firstCol.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (dateMatch && currentUnit) {
+                    const dateStr = firstCol;
+                    if (!result.daily_data) result.daily_data = {};
+                    
+                    const sjMidEnergy = parseFloat(df[idx][4]) || 0;
+                    const sjMidCost = parseFloat(df[idx][5]) || 0;
+                    const snMidEnergy = parseFloat(df[idx][7]) || 0;
+                    const snMidCost = parseFloat(df[idx][8]) || 0;
+                    
+                    const totalMidEnergy = sjMidEnergy + snMidEnergy;
+                    const totalMidCost = sjMidCost + snMidCost;
+                    const totalMidPrice = totalMidEnergy > 0 ? totalMidCost / totalMidEnergy : 0;
+                    
+                    if (!result.daily_data[dateStr]) result.daily_data[dateStr] = {};
+                    result.daily_data[dateStr][currentUnit] = {
+                        '综合电量': parseFloat(df[idx][1]) || 0,
+                        '综合电费': parseFloat(df[idx][2]) || 0,
+                        '综合电价': parseFloat(df[idx][3]) || 0,
+                        '中长期电量': totalMidEnergy,
+                        '中长期电费': totalMidCost,
+                        '中长期电价': totalMidPrice
+                    };
+                }
+            }
+            
+            return result;
+        }
+        
+        function parseMidtermFile(df, units) {
+            const result = {};
+            
+            for (let idx = 0; idx < df.length; idx++) {
+                const firstCol = String(df[idx][0] || '');
+                
+                for (const unit of units) {
+                    if (firstCol === unit) {
+                        if (!result[unit]) result[unit] = {};
+                        result[unit]['日滚动电量'] = parseFloat(df[idx][2]) || 0;
+                        result[unit]['日滚动盈利'] = parseFloat(df[idx][1]) || 0;
+                    }
+                }
+            }
+            
+            return result;
+        }
+        
+        function getLatestDate(spotData) {
+            if (!spotData.daily_data) return null;
+            const dates = Object.keys(spotData.daily_data);
+            if (dates.length === 0) return null;
+            dates.sort().reverse();
+            return dates[0];
+        }
+        
+        function getDayOfMonth(dateStr) {
+            const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (match) return parseInt(match[3]);
+            return null;
+        }
+        
+        function formatPrice(price) {
+            if (price === Math.floor(price)) {
+                return String(Math.floor(price));
+            } else {
+                let priceStr = price.toFixed(2);
+                if (priceStr.endsWith('0')) {
+                    priceStr = priceStr.slice(0, -1);
+                }
+                return priceStr;
+            }
+        }
+        
+        function generateReport() {
+            try {
+                const units = identifyUnits(spotData);
+                const spotParsed = parseSpotFile(spotData, units);
+                const midtermParsed = parseMidtermFile(midtermData, units);
+                
+                const latestDate = getLatestDate(spotParsed);
+                if (!latestDate) {
+                    alert('无法从省内现货复盘文件中找到日期数据');
+                    return;
+                }
+                
+                const dayOfMonth = getDayOfMonth(latestDate);
+                const month = parseInt(latestDate.split('-')[1]);
+                
+                const lines = [];
+                lines.push(`${month}月${dayOfMonth}日交易及结算情况预估`);
+                
+                for (let i = 0; i < units.length; i++) {
+                    const unit = units[i];
+                    const dailyDataAll = (spotParsed.daily_data || {})[latestDate] || {};
+                    const dailyData = dailyDataAll[unit] || {};
+                    const monthlyData = spotParsed[unit] || {};
+                    const midtermInfo = midtermParsed[unit] || {};
+                    
+                    const income = (dailyData['综合电费'] || 0) / 10000;
+                    const energy = dailyData['综合电量'] || 0;
+                    const price = dailyData['综合电价'] || 0;
+                    const midEnergy = dailyData['中长期电量'] || 0;
+                    const midPrice = dailyData['中长期电价'] || 0;
+                    
+                    const cumulativeEnergy = monthlyData['月累计电量'] || 0;
+                    const cumulativePrice = monthlyData['月累计电价'] || 0;
+                    
+                    const rollEnergy = midtermInfo['日滚动电量'] || 0;
+                    const rollProfit = midtermInfo['日滚动盈利'] || 0;
+                    
+                    let line1 = `${i + 1}. ${unit}综合统计收入${income.toFixed(2)}万元，综合电量${energy.toFixed(2)}MWh，综合电价${price.toFixed(2)}元/MWh`;
+                    if (midEnergy > 0) {
+                        const midPriceStr = formatPrice(midPrice);
+                        if (i > 0) {
+                            line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                        } else {
+                            line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                        }
+                    } else {
+                        line1 += '。';
+                    }
+                    lines.push(line1);
+                    
+                    lines.push(`1-${dayOfMonth}日累计综合电量${cumulativeEnergy.toFixed(2)}MWh，综合电价${cumulativePrice.toFixed(2)}元/MWh`);
+                    
+                    if (rollEnergy > 0) {
+                        lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
+                    } else {
+                        lines.push('当日日滚动交易无成交。');
+                    }
+                }
+                
+                const report = lines.join('\n');
+                document.getElementById('reportContent').textContent = report;
+                document.getElementById('resultSection').classList.add('show');
+                
+            } catch (error) {
+                alert('生成失败: ' + error.message);
+            }
+        }
+        
+        function copyReport() {
+            const content = document.getElementById('reportContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('已复制到剪贴板');
+            }).catch(err => {
+                alert('复制失败');
+            });
+        }
+        
+        function clearAll() {
+            spotData = null;
+            midtermData = null;
+            document.getElementById('spotFile').value = '';
+            document.getElementById('midtermFile').value = '';
+            document.getElementById('spotFileName').textContent = '';
+            document.getElementById('midtermFileName').textContent = '';
+            document.getElementById('spotBox').classList.remove('has-file');
+            document.getElementById('midtermBox').classList.remove('has-file');
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('resultSection').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
