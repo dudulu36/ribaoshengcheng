@@ -27,16 +27,16 @@
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
         
         .header h1 {
-            font-size: 2em;
-            margin-bottom: 8px;
+            font-size: 1.5em;
+            margin-bottom: 4px;
         }
         
         .header p {
-            font-size: 1em;
+            font-size: 0.9em;
             opacity: 0.9;
         }
         
@@ -44,15 +44,15 @@
             background: white;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
         
         .upload-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
         @media (max-width: 600px) {
@@ -64,7 +64,7 @@
         .upload-box {
             border: 2px dashed #ddd;
             border-radius: 12px;
-            padding: 20px;
+            padding: 12px;
             text-align: center;
             transition: all 0.3s;
             cursor: pointer;
@@ -97,6 +97,13 @@
             color: #666;
         }
         
+        .upload-hint {
+            font-size: 0.75em;
+            color: #666;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        
         .file-name {
             margin-top: 10px;
             padding: 6px 12px;
@@ -119,15 +126,16 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 14px 30px;
-            font-size: 1.1em;
+            padding: 10px 20px;
+            font-size: 1em;
             font-weight: 600;
             color: white;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            margin-bottom: 8px;
         }
         
         .btn:hover {
@@ -144,7 +152,6 @@
         
         .btn-clear {
             background: #999;
-            margin-top: 10px;
         }
         
         .result-section {
@@ -156,23 +163,23 @@
         }
         
         .result-title {
-            font-size: 1.2em;
+            font-size: 1em;
             font-weight: 600;
             color: #333;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         
         .result-content {
             background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
+            border-radius: 8px;
+            padding: 10px;
             font-family: 'Consolas', monospace;
-            font-size: 0.95em;
-            line-height: 1.6;
+            font-size: 0.9em;
+            line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
             border: 1px solid #e9ecef;
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
         }
         
@@ -190,18 +197,33 @@
         .copy-btn:hover {
             background: #138496;
         }
+        
+        .tips {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-size: 0.8em;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>日报自动生成系统</h1>
-            <p>上传省内现货复盘和中长期复盘文件，一键生成日报</p>
+            <p>上传 Excel 文件，一键生成日报</p>
         </div>
         
         <div class="card">
+            <div class="tips">
+                💡 提示：可以只上传一个文件，系统会自动识别并生成对应的内容
+            </div>
+            
             <div class="upload-section">
                 <div class="upload-box" id="spotBox" onclick="document.getElementById('spotFile').click()">
+                    <div class="upload-hint">聆风省内现货披露当月1号至今的数据</div>
                     <div class="upload-icon">📊</div>
                     <div class="upload-title">省内现货复盘文件</div>
                     <div class="upload-desc">点击选择 Excel 文件</div>
@@ -210,6 +232,7 @@
                 </div>
                 
                 <div class="upload-box" id="midtermBox" onclick="document.getElementById('midtermFile').click()">
+                    <div class="upload-hint">聆风中长期复盘滚撮单日数据（可不上传）</div>
                     <div class="upload-icon">📈</div>
                     <div class="upload-title">中长期复盘文件</div>
                     <div class="upload-desc">点击选择 Excel 文件</div>
@@ -218,7 +241,7 @@
                 </div>
             </div>
             
-            <button class="btn" id="generateBtn" onclick="generateReport()" disabled>
+            <button class="btn" id="generateBtn" onclick="generateReport()">
                 生成日报
             </button>
             
@@ -258,19 +281,8 @@
                     document.getElementById('midtermFileName').textContent = file.name;
                     document.getElementById('midtermBox').classList.add('has-file');
                 }
-                
-                checkFiles();
             };
             reader.readAsArrayBuffer(file);
-        }
-        
-        function checkFiles() {
-            const btn = document.getElementById('generateBtn');
-            if (spotData && midtermData) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
         }
         
         function identifyUnits(df) {
@@ -381,61 +393,154 @@
         }
         
         function generateReport() {
+            if (!spotData && !midtermData) {
+                alert('请至少上传一个文件');
+                return;
+            }
+            
             try {
-                const units = identifyUnits(spotData);
-                const spotParsed = parseSpotFile(spotData, units);
-                const midtermParsed = parseMidtermFile(midtermData, units);
+                const lines = [];
+                let units = [];
+                let spotParsed = null;
+                let midtermParsed = null;
                 
-                const latestDate = getLatestDate(spotParsed);
-                if (!latestDate) {
-                    alert('无法从省内现货复盘文件中找到日期数据');
-                    return;
+                // 获取场站列表
+                if (spotData) {
+                    units = identifyUnits(spotData);
+                    spotParsed = parseSpotFile(spotData, units);
+                } else if (midtermData) {
+                    units = identifyUnits(midtermData);
                 }
                 
-                const dayOfMonth = getDayOfMonth(latestDate);
-                const month = parseInt(latestDate.split('-')[1]);
+                if (midtermData) {
+                    midtermParsed = parseMidtermFile(midtermData, units);
+                }
                 
-                const lines = [];
-                lines.push(`${month}月${dayOfMonth}日交易及结算情况预估`);
+                const hasSpot = spotData && spotParsed;
+                const hasMidterm = midtermData && midtermParsed;
                 
-                for (let i = 0; i < units.length; i++) {
-                    const unit = units[i];
-                    const dailyDataAll = (spotParsed.daily_data || {})[latestDate] || {};
-                    const dailyData = dailyDataAll[unit] || {};
-                    const monthlyData = spotParsed[unit] || {};
-                    const midtermInfo = midtermParsed[unit] || {};
-                    
-                    const income = (dailyData['综合电费'] || 0) / 10000;
-                    const energy = dailyData['综合电量'] || 0;
-                    const price = dailyData['综合电价'] || 0;
-                    const midEnergy = dailyData['中长期电量'] || 0;
-                    const midPrice = dailyData['中长期电价'] || 0;
-                    
-                    const cumulativeEnergy = monthlyData['月累计电量'] || 0;
-                    const cumulativePrice = monthlyData['月累计电价'] || 0;
-                    
-                    const rollEnergy = midtermInfo['日滚动电量'] || 0;
-                    const rollProfit = midtermInfo['日滚动盈利'] || 0;
-                    
-                    let line1 = `${i + 1}. ${unit}综合统计收入${income.toFixed(2)}万元，综合电量${energy.toFixed(2)}MWh，综合电价${price.toFixed(2)}元/MWh`;
-                    if (midEnergy > 0) {
-                        const midPriceStr = formatPrice(midPrice);
-                        if (i > 0) {
-                            line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
-                        } else {
-                            line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
-                        }
-                    } else {
-                        line1 += '。';
+                // 情况1：只有现货数据
+                if (hasSpot && !hasMidterm) {
+                    const latestDate = getLatestDate(spotParsed);
+                    if (!latestDate) {
+                        alert('无法从省内现货复盘文件中找到日期数据');
+                        return;
                     }
-                    lines.push(line1);
                     
-                    lines.push(`1-${dayOfMonth}日累计综合电量${cumulativeEnergy.toFixed(2)}MWh，综合电价${cumulativePrice.toFixed(2)}元/MWh`);
+                    const dayOfMonth = getDayOfMonth(latestDate);
+                    const month = parseInt(latestDate.split('-')[1]);
                     
-                    if (rollEnergy > 0) {
-                        lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
-                    } else {
-                        lines.push('当日日滚动交易无成交。');
+                    lines.push(`${month}月${dayOfMonth}日交易及结算情况预估`);
+                    
+                    for (let i = 0; i < units.length; i++) {
+                        const unit = units[i];
+                        const dailyDataAll = (spotParsed.daily_data || {})[latestDate] || {};
+                        const dailyData = dailyDataAll[unit] || {};
+                        const monthlyData = spotParsed[unit] || {};
+                        
+                        const income = (dailyData['综合电费'] || 0) / 10000;
+                        const energy = dailyData['综合电量'] || 0;
+                        const price = dailyData['综合电价'] || 0;
+                        const midEnergy = dailyData['中长期电量'] || 0;
+                        const midPrice = dailyData['中长期电价'] || 0;
+                        
+                        const cumulativeEnergy = monthlyData['月累计电量'] || 0;
+                        const cumulativePrice = monthlyData['月累计电价'] || 0;
+                        
+                        let line1 = `${i + 1}. ${unit}综合统计收入${income.toFixed(2)}万元，综合电量${energy.toFixed(2)}MWh，综合电价${price.toFixed(2)}元/MWh`;
+                        if (midEnergy > 0) {
+                            const midPriceStr = formatPrice(midPrice);
+                            if (i > 0) {
+                                line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                            } else {
+                                line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                            }
+                        } else {
+                            line1 += '。';
+                        }
+                        lines.push(line1);
+                        
+                        lines.push(`1-${dayOfMonth}日累计综合电量${cumulativeEnergy.toFixed(2)}MWh，综合电价${cumulativePrice.toFixed(2)}元/MWh`);
+                    }
+                }
+                // 情况2：只有中长期数据
+                else if (!hasSpot && hasMidterm) {
+                    for (let i = 0; i < units.length; i++) {
+                        const unit = units[i];
+                        const midtermInfo = midtermParsed[unit] || {};
+                        
+                        const rollEnergy = midtermInfo['日滚动电量'] || 0;
+                        const rollProfit = midtermInfo['日滚动盈利'] || 0;
+                        
+                        if (rollEnergy > 0) {
+                            lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
+                        } else {
+                            lines.push('当日日滚动交易无成交。');
+                        }
+                    }
+                    
+                    if (lines.length === 0) {
+                        alert('未找到中长期复盘数据');
+                        return;
+                    }
+                }
+                // 情况3：两个文件都有
+                else if (hasSpot && hasMidterm) {
+                    const latestDate = getLatestDate(spotParsed);
+                    if (!latestDate) {
+                        alert('无法从省内现货复盘文件中找到日期数据');
+                        return;
+                    }
+                    
+                    const dayOfMonth = getDayOfMonth(latestDate);
+                    const month = parseInt(latestDate.split('-')[1]);
+                    
+                    lines.push(`${month}月${dayOfMonth}日交易及结算情况预估`);
+                    
+                    // 每个场站：现货部分 + 中长期部分
+                    for (let i = 0; i < units.length; i++) {
+                        const unit = units[i];
+                        
+                        // 现货数据
+                        const dailyDataAll = (spotParsed.daily_data || {})[latestDate] || {};
+                        const dailyData = dailyDataAll[unit] || {};
+                        const monthlyData = spotParsed[unit] || {};
+                        
+                        const income = (dailyData['综合电费'] || 0) / 10000;
+                        const energy = dailyData['综合电量'] || 0;
+                        const price = dailyData['综合电价'] || 0;
+                        const midEnergy = dailyData['中长期电量'] || 0;
+                        const midPrice = dailyData['中长期电价'] || 0;
+                        
+                        const cumulativeEnergy = monthlyData['月累计电量'] || 0;
+                        const cumulativePrice = monthlyData['月累计电价'] || 0;
+                        
+                        let line1 = `${i + 1}. ${unit}综合统计收入${income.toFixed(2)}万元，综合电量${energy.toFixed(2)}MWh，综合电价${price.toFixed(2)}元/MWh`;
+                        if (midEnergy > 0) {
+                            const midPriceStr = formatPrice(midPrice);
+                            if (i > 0) {
+                                line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                            } else {
+                                line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                            }
+                        } else {
+                            line1 += '。';
+                        }
+                        lines.push(line1);
+                        
+                        // 累计数据
+                        lines.push(`1-${dayOfMonth}日累计综合电量${cumulativeEnergy.toFixed(2)}MWh，综合电价${cumulativePrice.toFixed(2)}元/MWh`);
+                        
+                        // 中长期数据（紧跟在这个场站后面）
+                        const midtermInfo = midtermParsed[unit] || {};
+                        const rollEnergy = midtermInfo['日滚动电量'] || 0;
+                        const rollProfit = midtermInfo['日滚动盈利'] || 0;
+                        
+                        if (rollEnergy > 0) {
+                            lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
+                        } else {
+                            lines.push('当日日滚动交易无成交。');
+                        }
                     }
                 }
                 
@@ -466,7 +571,6 @@
             document.getElementById('midtermFileName').textContent = '';
             document.getElementById('spotBox').classList.remove('has-file');
             document.getElementById('midtermBox').classList.remove('has-file');
-            document.getElementById('generateBtn').disabled = true;
             document.getElementById('resultSection').classList.remove('show');
         }
     </script>
