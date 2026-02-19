@@ -6,207 +6,36 @@
     <title>日报自动生成系统</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 15px;
-        }
-        
-        .header h1 {
-            font-size: 1.5em;
-            margin-bottom: 4px;
-        }
-        
-        .header p {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .upload-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        @media (max-width: 600px) {
-            .upload-section {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .upload-box {
-            border: 2px dashed #ddd;
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .upload-box:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-        
-        .upload-box.has-file {
-            border-color: #28a745;
-            background: #f0fff4;
-        }
-        
-        .upload-icon {
-            font-size: 36px;
-            margin-bottom: 8px;
-        }
-        
-        .upload-title {
-            font-size: 1em;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        
-        .upload-desc {
-            font-size: 0.85em;
-            color: #666;
-        }
-        
-        .upload-hint {
-            font-size: 0.75em;
-            color: #666;
-            margin-bottom: 4px;
-            text-align: center;
-        }
-        
-        .file-name {
-            margin-top: 10px;
-            padding: 6px 12px;
-            background: #667eea;
-            color: white;
-            border-radius: 15px;
-            font-size: 0.8em;
-            display: none;
-        }
-        
-        .upload-box.has-file .file-name {
-            display: inline-block;
-            background: #28a745;
-        }
-        
-        input[type="file"] {
-            display: none;
-        }
-        
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 10px 20px;
-            font-size: 1em;
-            font-weight: 600;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 8px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .btn-clear {
-            background: #999;
-        }
-        
-        .result-section {
-            display: none;
-        }
-        
-        .result-section.show {
-            display: block;
-        }
-        
-        .result-title {
-            font-size: 1em;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .result-content {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px;
-            font-family: 'Consolas', monospace;
-            font-size: 0.9em;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            border: 1px solid #e9ecef;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .copy-btn {
-            margin-top: 10px;
-            padding: 8px 16px;
-            font-size: 0.9em;
-            background: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        
-        .copy-btn:hover {
-            background: #138496;
-        }
-        
-        .tips {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 10px;
-            font-size: 0.8em;
-            color: #856404;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 15px; }
+        .header h1 { font-size: 1.5em; margin-bottom: 4px; }
+        .header p { font-size: 0.9em; opacity: 0.9; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 15px; margin-bottom: 15px; }
+        .upload-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (max-width: 600px) { .upload-section { grid-template-columns: 1fr; } }
+        .upload-box { border: 2px dashed #ddd; border-radius: 12px; padding: 12px; text-align: center; transition: all 0.3s; cursor: pointer; }
+        .upload-box:hover { border-color: #667eea; background: #f8f9ff; }
+        .upload-box.has-file { border-color: #28a745; background: #f0fff4; }
+        .upload-icon { font-size: 36px; margin-bottom: 8px; }
+        .upload-title { font-size: 1em; font-weight: 600; color: #333; margin-bottom: 4px; }
+        .upload-desc { font-size: 0.85em; color: #666; }
+        .upload-hint { font-size: 0.75em; color: #666; margin-bottom: 4px; text-align: center; }
+        .file-name { margin-top: 10px; padding: 6px 12px; background: #667eea; color: white; border-radius: 15px; font-size: 0.8em; display: none; }
+        .upload-box.has-file .file-name { display: inline-block; background: #28a745; }
+        input[type="file"] { display: none; }
+        .btn { display: block; width: 100%; padding: 10px 20px; font-size: 1em; font-weight: 600; color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; margin-bottom: 8px; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-clear { background: #999; }
+        .result-section { display: none; }
+        .result-section.show { display: block; }
+        .result-title { font-size: 1em; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .result-content { background: #f8f9fa; border-radius: 8px; padding: 10px; font-family: 'Consolas', monospace; font-size: 0.9em; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #e9ecef; max-height: 300px; overflow-y: auto; }
+        .copy-btn { margin-top: 10px; padding: 8px 16px; font-size: 0.9em; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .copy-btn:hover { background: #138496; }
+        .tips { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 8px; margin-bottom: 10px; font-size: 0.8em; color: #856404; }
     </style>
 </head>
 <body>
@@ -215,12 +44,8 @@
             <h1>日报自动生成系统</h1>
             <p>上传 Excel 文件，一键生成日报</p>
         </div>
-        
         <div class="card">
-            <div class="tips">
-                💡 提示：可以只上传一个文件，系统会自动识别并生成对应的内容
-            </div>
-            
+            <div class="tips">💡 提示：可以只上传一个文件，系统会自动识别并生成对应的内容</div>
             <div class="upload-section">
                 <div class="upload-box" id="spotBox" onclick="document.getElementById('spotFile').click()">
                     <div class="upload-hint">聆风省内现货披露当月1号至今的数据</div>
@@ -230,7 +55,6 @@
                     <div class="file-name" id="spotFileName"></div>
                     <input type="file" id="spotFile" accept=".xlsx,.xls" onchange="handleFileSelect(this, 'spot')">
                 </div>
-                
                 <div class="upload-box" id="midtermBox" onclick="document.getElementById('midtermFile').click()">
                     <div class="upload-hint">聆风中长期复盘滚撮单日数据（可不上传）</div>
                     <div class="upload-icon">📈</div>
@@ -240,23 +64,15 @@
                     <input type="file" id="midtermFile" accept=".xlsx,.xls" onchange="handleFileSelect(this, 'midterm')">
                 </div>
             </div>
-            
-            <button class="btn" id="generateBtn" onclick="generateReport()">
-                生成日报
-            </button>
-            
-            <button class="btn btn-clear" onclick="clearAll()">
-                清空
-            </button>
+            <button class="btn" id="generateBtn" onclick="generateReport()">生成日报</button>
+            <button class="btn btn-clear" onclick="clearAll()">清空</button>
         </div>
-        
         <div class="card result-section" id="resultSection">
             <div class="result-title">📝 生成的日报</div>
             <div class="result-content" id="reportContent"></div>
             <button class="copy-btn" onclick="copyReport()">复制日报</button>
         </div>
     </div>
-    
     <script>
         let spotData = null;
         let midtermData = null;
@@ -264,14 +80,12 @@
         function handleFileSelect(input, type) {
             const file = input.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-                
                 if (type === 'spot') {
                     spotData = jsonData;
                     document.getElementById('spotFileName').textContent = file.name;
@@ -289,71 +103,108 @@
             const units = [];
             for (let idx = 0; idx < df.length; idx++) {
                 const firstCol = String(df[idx][0] || '');
-                
                 if (['', '合计', '聚合维度'].includes(firstCol)) continue;
-                
                 if (/^\d{4}-\d{2}$/.test(firstCol)) continue;
                 if (/^\d{4}-\d{2}-\d{2}$/.test(firstCol)) continue;
-                
                 if (!isNaN(parseFloat(firstCol)) && firstCol.trim() !== '') continue;
-                
                 if (idx >= 3) units.push(firstCol);
             }
             return units;
         }
         
+        // 检测文件格式：基于表头判断
+        // 旧格式(2.17)：列1="综合电量"
+        // 新格式(山西)：列1="综合电费"
+        function detectFormat(df) {
+            const row1 = df[1] || [];
+            const col1 = String(row1[1] || '');
+            // 包含"电量"说明是旧格式，包含"电费"说明是新格式
+            if (col1.includes('电量')) return 'old';
+            if (col1.includes('电费')) return 'new';
+            return 'old';
+        }
+        
+        // 解析现货文件
         function parseSpotFile(df, units) {
             const result = {};
             let currentUnit = null;
+            const format = detectFormat(df);
             
             for (let idx = 0; idx < df.length; idx++) {
                 const firstCol = String(df[idx][0] || '');
                 
+                // 匹配场站名
                 for (const unit of units) {
                     if (firstCol === unit) {
                         currentUnit = unit;
                         if (!result[unit]) result[unit] = {};
-                        result[unit]['月累计电量'] = parseFloat(df[idx][1]) || 0;
-                        result[unit]['月累计电价'] = parseFloat(df[idx][3]) || 0;
+                        
+                        if (format === 'old') {
+                            // 旧格式：列1=电量, 列3=电价
+                            result[unit]['月累计电量'] = parseFloat(df[idx][1]) || 0;
+                            result[unit]['月累计电价'] = parseFloat(df[idx][3]) || 0;
+                        } else {
+                            // 新格式：列2=电量, 列3=电价
+                            result[unit]['月累计电量'] = parseFloat(df[idx][2]) || 0;
+                            result[unit]['月累计电价'] = parseFloat(df[idx][3]) || 0;
+                        }
                         break;
                     }
                 }
                 
+                // 匹配日期行
                 const dateMatch = firstCol.match(/^(\d{4})-(\d{2})-(\d{2})$/);
                 if (dateMatch && currentUnit) {
                     const dateStr = firstCol;
                     if (!result.daily_data) result.daily_data = {};
                     
-                    const sjMidEnergy = parseFloat(df[idx][4]) || 0;
-                    const sjMidCost = parseFloat(df[idx][5]) || 0;
-                    const snMidEnergy = parseFloat(df[idx][7]) || 0;
-                    const snMidCost = parseFloat(df[idx][8]) || 0;
+                    let dailyEnergy, dailyCost, dailyPrice;
+                    let midEnergy = 0, midFee = 0;
                     
-                    const totalMidEnergy = sjMidEnergy + snMidEnergy;
-                    const totalMidCost = sjMidCost + snMidCost;
-                    const totalMidPrice = totalMidEnergy > 0 ? totalMidCost / totalMidEnergy : 0;
+                    if (format === 'old') {
+                        // 旧格式：列1=电量, 列2=电费, 列3=电价
+                        dailyEnergy = parseFloat(df[idx][1]) || 0;
+                        dailyCost = parseFloat(df[idx][2]) || 0;
+                        dailyPrice = parseFloat(df[idx][3]) || 0;
+                        
+                        // 中长期 = 省间(列4,5) + 省内(列7,8)
+                        const sjEnergy = parseFloat(df[idx][4]) || 0;
+                        const sjFee = parseFloat(df[idx][5]) || 0;
+                        const snEnergy = parseFloat(df[idx][7]) || 0;
+                        const snFee = parseFloat(df[idx][8]) || 0;
+                        midEnergy = sjEnergy + snEnergy;
+                        midFee = sjFee + snFee;
+                    } else {
+                        // 新格式：列1=电费, 列2=电量, 列3=电价
+                        dailyEnergy = parseFloat(df[idx][2]) || 0;
+                        dailyCost = parseFloat(df[idx][1]) || 0;
+                        dailyPrice = parseFloat(df[idx][3]) || 0;
+                        
+                        // 中长期：市场化中长期 列5=电量, 列6=电费
+                        midEnergy = parseFloat(df[idx][5]) || 0;
+                        midFee = parseFloat(df[idx][6]) || 0;
+                    }
+                    
+                    const midPrice = midEnergy > 0 ? midFee / midEnergy : 0;
                     
                     if (!result.daily_data[dateStr]) result.daily_data[dateStr] = {};
                     result.daily_data[dateStr][currentUnit] = {
-                        '综合电量': parseFloat(df[idx][1]) || 0,
-                        '综合电费': parseFloat(df[idx][2]) || 0,
-                        '综合电价': parseFloat(df[idx][3]) || 0,
-                        '中长期电量': totalMidEnergy,
-                        '中长期电费': totalMidCost,
-                        '中长期电价': totalMidPrice
+                        '综合电量': dailyEnergy,
+                        '综合电费': dailyCost,
+                        '综合电价': dailyPrice,
+                        '中长期电量': midEnergy,
+                        '中长期电费': midFee,
+                        '中长期电价': midPrice
                     };
                 }
             }
-            
             return result;
         }
         
         function parseMidtermFile(df, units) {
             const result = {};
-            
             for (let idx = 0; idx < df.length; idx++) {
                 const firstCol = String(df[idx][0] || '');
-                
                 for (const unit of units) {
                     if (firstCol === unit) {
                         if (!result[unit]) result[unit] = {};
@@ -362,7 +213,6 @@
                     }
                 }
             }
-            
             return result;
         }
         
@@ -381,51 +231,27 @@
         }
         
         function formatPrice(price) {
-            if (price === Math.floor(price)) {
-                return String(Math.floor(price));
-            } else {
-                let priceStr = price.toFixed(2);
-                if (priceStr.endsWith('0')) {
-                    priceStr = priceStr.slice(0, -1);
-                }
-                return priceStr;
-            }
+            if (price === Math.floor(price)) return String(Math.floor(price));
+            let priceStr = price.toFixed(2);
+            if (priceStr.endsWith('0')) priceStr = priceStr.slice(0, -1);
+            return priceStr;
         }
         
         function generateReport() {
-            if (!spotData && !midtermData) {
-                alert('请至少上传一个文件');
-                return;
-            }
+            if (!spotData && !midtermData) { alert('请至少上传一个文件'); return; }
             
             try {
                 const lines = [];
-                let units = [];
-                let spotParsed = null;
-                let midtermParsed = null;
-                
-                // 获取场站列表
-                if (spotData) {
-                    units = identifyUnits(spotData);
-                    spotParsed = parseSpotFile(spotData, units);
-                } else if (midtermData) {
-                    units = identifyUnits(midtermData);
-                }
-                
-                if (midtermData) {
-                    midtermParsed = parseMidtermFile(midtermData, units);
-                }
+                let units = spotData ? identifyUnits(spotData) : (midtermData ? identifyUnits(midtermData) : []);
+                let spotParsed = spotData ? parseSpotFile(spotData, units) : null;
+                let midtermParsed = midtermData ? parseMidtermFile(midtermData, units) : null;
                 
                 const hasSpot = spotData && spotParsed;
                 const hasMidterm = midtermData && midtermParsed;
                 
-                // 情况1：只有现货数据
                 if (hasSpot && !hasMidterm) {
                     const latestDate = getLatestDate(spotParsed);
-                    if (!latestDate) {
-                        alert('无法从省内现货复盘文件中找到日期数据');
-                        return;
-                    }
+                    if (!latestDate) { alert('无法从省内现货复盘文件中找到日期数据'); return; }
                     
                     const dayOfMonth = getDayOfMonth(latestDate);
                     const month = parseInt(latestDate.split('-')[1]);
@@ -443,128 +269,80 @@
                         const price = dailyData['综合电价'] || 0;
                         const midEnergy = dailyData['中长期电量'] || 0;
                         const midPrice = dailyData['中长期电价'] || 0;
-                        
                         const cumulativeEnergy = monthlyData['月累计电量'] || 0;
                         const cumulativePrice = monthlyData['月累计电价'] || 0;
                         
                         let line1 = `${i + 1}. ${unit}综合统计收入${income.toFixed(2)}万元，综合电量${energy.toFixed(2)}MWh，综合电价${price.toFixed(2)}元/MWh`;
                         if (midEnergy > 0) {
                             const midPriceStr = formatPrice(midPrice);
-                            if (i > 0) {
-                                line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
-                            } else {
-                                line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
-                            }
-                        } else {
-                            line1 += '。';
-                        }
+                            if (i > 0) line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                            else line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                        } else { line1 += '。'; }
                         lines.push(line1);
-                        
                         lines.push(`1-${dayOfMonth}日累计综合电量${cumulativeEnergy.toFixed(2)}MWh，综合电价${cumulativePrice.toFixed(2)}元/MWh`);
                     }
-                }
-                // 情况2：只有中长期数据
-                else if (!hasSpot && hasMidterm) {
+                } else if (!hasSpot && hasMidterm) {
                     for (let i = 0; i < units.length; i++) {
                         const unit = units[i];
                         const midtermInfo = midtermParsed[unit] || {};
-                        
                         const rollEnergy = midtermInfo['日滚动电量'] || 0;
                         const rollProfit = midtermInfo['日滚动盈利'] || 0;
-                        
-                        if (rollEnergy > 0) {
-                            lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
-                        } else {
-                            lines.push('当日日滚动交易无成交。');
-                        }
+                        if (rollEnergy > 0) lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
+                        else lines.push('当日日滚动交易无成交。');
                     }
-                    
-                    if (lines.length === 0) {
-                        alert('未找到中长期复盘数据');
-                        return;
-                    }
-                }
-                // 情况3：两个文件都有
-                else if (hasSpot && hasMidterm) {
+                    if (lines.length === 0) { alert('未找到中长期复盘数据'); return; }
+                } else if (hasSpot && hasMidterm) {
                     const latestDate = getLatestDate(spotParsed);
-                    if (!latestDate) {
-                        alert('无法从省内现货复盘文件中找到日期数据');
-                        return;
-                    }
+                    if (!latestDate) { alert('无法从省内现货复盘文件中找到日期数据'); return; }
                     
                     const dayOfMonth = getDayOfMonth(latestDate);
                     const month = parseInt(latestDate.split('-')[1]);
                     
                     lines.push(`${month}月${dayOfMonth}日交易及结算情况预估`);
                     
-                    // 每个场站：现货部分 + 中长期部分
                     for (let i = 0; i < units.length; i++) {
                         const unit = units[i];
-                        
-                        // 现货数据
                         const dailyDataAll = (spotParsed.daily_data || {})[latestDate] || {};
                         const dailyData = dailyDataAll[unit] || {};
                         const monthlyData = spotParsed[unit] || {};
+                        const midtermInfo = midtermParsed[unit] || {};
                         
                         const income = (dailyData['综合电费'] || 0) / 10000;
                         const energy = dailyData['综合电量'] || 0;
                         const price = dailyData['综合电价'] || 0;
                         const midEnergy = dailyData['中长期电量'] || 0;
                         const midPrice = dailyData['中长期电价'] || 0;
-                        
                         const cumulativeEnergy = monthlyData['月累计电量'] || 0;
                         const cumulativePrice = monthlyData['月累计电价'] || 0;
+                        const rollEnergy = midtermInfo['日滚动电量'] || 0;
+                        const rollProfit = midtermInfo['日滚动盈利'] || 0;
                         
                         let line1 = `${i + 1}. ${unit}综合统计收入${income.toFixed(2)}万元，综合电量${energy.toFixed(2)}MWh，综合电价${price.toFixed(2)}元/MWh`;
                         if (midEnergy > 0) {
                             const midPriceStr = formatPrice(midPrice);
-                            if (i > 0) {
-                                line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
-                            } else {
-                                line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
-                            }
-                        } else {
-                            line1 += '。';
-                        }
+                            if (i > 0) line1 += `；其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                            else line1 += `，其中中长期电量${midEnergy.toFixed(2)}MWh，中长期电价${midPriceStr}元/MWh。`;
+                        } else { line1 += '。'; }
                         lines.push(line1);
-                        
-                        // 累计数据
                         lines.push(`1-${dayOfMonth}日累计综合电量${cumulativeEnergy.toFixed(2)}MWh，综合电价${cumulativePrice.toFixed(2)}元/MWh`);
                         
-                        // 中长期数据（紧跟在这个场站后面）
-                        const midtermInfo = midtermParsed[unit] || {};
-                        const rollEnergy = midtermInfo['日滚动电量'] || 0;
-                        const rollProfit = midtermInfo['日滚动盈利'] || 0;
-                        
-                        if (rollEnergy > 0) {
-                            lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
-                        } else {
-                            lines.push('当日日滚动交易无成交。');
-                        }
+                        if (rollEnergy > 0) lines.push(`当日日滚动成交电量${rollEnergy.toFixed(0)}MWh，盈利${rollProfit.toFixed(2)}元。`);
+                        else lines.push('当日日滚动交易无成交。');
                     }
                 }
                 
-                const report = lines.join('\n');
-                document.getElementById('reportContent').textContent = report;
+                document.getElementById('reportContent').textContent = lines.join('\n');
                 document.getElementById('resultSection').classList.add('show');
-                
-            } catch (error) {
-                alert('生成失败: ' + error.message);
-            }
+            } catch (error) { alert('生成失败: ' + error.message); }
         }
         
         function copyReport() {
             const content = document.getElementById('reportContent').textContent;
-            navigator.clipboard.writeText(content).then(() => {
-                alert('已复制到剪贴板');
-            }).catch(err => {
-                alert('复制失败');
-            });
+            navigator.clipboard.writeText(content).then(() => { alert('已复制到剪贴板'); }).catch(err => { alert('复制失败'); });
         }
         
         function clearAll() {
-            spotData = null;
-            midtermData = null;
+            spotData = null; midtermData = null;
             document.getElementById('spotFile').value = '';
             document.getElementById('midtermFile').value = '';
             document.getElementById('spotFileName').textContent = '';
